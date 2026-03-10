@@ -1,44 +1,56 @@
-"use client";
-
-import { useState } from "react";
 import styles from "./page.module.css";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { mockReports, mockUsers } from "@/data/mock";
-import { ReportCard } from "@/components/feed/ReportCard";
-import { Award, Shield, Settings, FileText, Globe, LogOut } from "lucide-react";
+import { Badge } from "@/components/ui/Badge";
+import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
+import { Award, Shield, FileText, Users } from "lucide-react";
+import ProfileTabs from "./ProfileTabs";
+import AvatarUpload from "./AvatarUpload";
 
-export default function ProfilePage() {
-  const [activeTab, setActiveTab] = useState(() => {
-    if (typeof window !== "undefined") {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get("tab") === "settings") {
-        return "settings";
-      }
-    }
-    return "reports";
-  });
-  
-  // Use user id "u2" as the current logged in user (Ochieng O.)
-  const currentUser = mockUsers[1];
-  const userReports = mockReports.filter(r => r.user_id === currentUser.id);
+export default async function ProfilePage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  // Gamification logic
-  const rank = currentUser.citizen_credits > 1000 ? "Senior Watchdog" : "Citizen Check";
-  
+  if (!user) {
+    redirect("/login");
+  }
+
+  // Fetch the profile from the database
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  const fullName = profile?.full_name || user.user_metadata?.full_name || user.email?.split("@")[0] || "Citizen";
+  const username = profile?.username || user.user_metadata?.username || user.email?.split("@")[0] || "citizen";
+  const avatarUrl = profile?.avatar_url || user.user_metadata?.avatar_url || null;
+  const initials = fullName.charAt(0).toUpperCase();
+  const citizenCredits = profile?.citizen_credits || 0;
+  const followerCount = profile?.follower_count || 0;
+  const followingCount = profile?.following_count || 0;
+
+  // Count user's reports
+  const { count: reportCount } = await supabase
+    .from("reports")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", user.id);
+
+  const rank = citizenCredits > 1000 ? "Senior Watchdog" : citizenCredits > 500 ? "Active Reporter" : "Citizen Watch";
+
   return (
     <div className={styles.container}>
       {/* Profile Header Card */}
       <Card className={styles.profileHeader}>
         <div className={styles.avatarSection}>
-          <div className={styles.avatarWrapper}>
-            <Avatar src={currentUser.avatar_url} fallback={currentUser.name.charAt(0)} size="lg" />
-            <div className={styles.onlineBadge} />
-          </div>
+          <AvatarUpload 
+            currentAvatarUrl={avatarUrl} 
+            initials={initials} 
+            userId={user.id} 
+          />
           <div className={styles.userInfo}>
-            <h1 className={styles.name}>{currentUser.name}</h1>
+            <h1 className={styles.name}>{fullName}</h1>
+            <p className={styles.username}>@{username}</p>
             <Badge variant="resolved" className={styles.rankBadge}>
                <Shield size={14} /> {rank}
             </Badge>
@@ -51,114 +63,53 @@ export default function ProfilePage() {
           <div className={styles.statBox}>
             <span className={styles.statIcon}><Award color="#ffab00" size={24}/></span>
             <div>
-              <h3 className={styles.statValue}>{currentUser.citizen_credits.toLocaleString()}</h3>
-              <p className={styles.statLabel}>Citizen Credits</p>
+              <h3 className={styles.statValue}>{citizenCredits.toLocaleString()}</h3>
+              <p className={styles.statLabel}>Credits</p>
             </div>
           </div>
           <div className={styles.statBox}>
             <span className={styles.statIcon}><FileText color="var(--color-primary)" size={24}/></span>
             <div>
-              <h3 className={styles.statValue}>{userReports.length}</h3>
-              <p className={styles.statLabel}>Reports Filed</p>
+              <h3 className={styles.statValue}>{reportCount || 0}</h3>
+              <p className={styles.statLabel}>Reports</p>
             </div>
+          </div>
+          <div className={styles.statBox}>
+            <span className={styles.statIcon}><Users color="var(--color-accent-cyan)" size={24}/></span>
+            <div>
+              <h3 className={styles.statValue}>{followerCount.toLocaleString()}</h3>
+              <p className={styles.statLabel}>Followers</p>
+            </div>
+          </div>
+          <div className={styles.statBox}>
+            <span className={styles.statIcon}><Users color="var(--color-text-muted)" size={24}/></span>
+            <div>
+              <h3 className={styles.statValue}>{followingCount.toLocaleString()}</h3>
+              <p className={styles.statLabel}>Following</p>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.userDetails}>
+          <div className={styles.detailRow}>
+            <span className={styles.detailLabel}>Email</span>
+            <span className={styles.detailValue}>{user.email}</span>
+          </div>
+          <div className={styles.detailRow}>
+            <span className={styles.detailLabel}>Member Since</span>
+            <span className={styles.detailValue}>
+              {new Date(user.created_at).toLocaleDateString('en-KE', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </span>
           </div>
         </div>
       </Card>
 
       {/* Profile Tabs */}
-      <div className={styles.tabsWrapper}>
-        <div className={styles.tabs}>
-          <button 
-            className={`${styles.tab} ${activeTab === "reports" ? styles.activeTab : ""}`}
-            onClick={() => setActiveTab("reports")}
-          >
-            <FileText size={18} /> My Reports
-          </button>
-          <button 
-            className={`${styles.tab} ${activeTab === "settings" ? styles.activeTab : ""}`}
-            onClick={() => setActiveTab("settings")}
-          >
-            <Settings size={18} /> Settings
-          </button>
-          <div 
-            className={styles.tabIndicator} 
-            style={{
-              transform: `translateX(${activeTab === "reports" ? "0" : "100%"})`
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Tab Content */}
-      <div className={styles.tabContent}>
-        
-        {/* Reports Tab */}
-        {activeTab === "reports" && (
-          <div className={styles.reportsGrid}>
-            {userReports.length > 0 ? (
-              userReports.map(report => (
-                <div key={report.id} className={styles.feedItem}>
-                  <ReportCard report={report} />
-                </div>
-              ))
-            ) : (
-              <div className={styles.emptyState}>
-                <FileText size={48} color="var(--color-text-muted)" />
-                <p>You haven&apos;t filed any reports yet.</p>
-                <Button>Start Reporting</Button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Settings Tab */}
-        {activeTab === "settings" && (
-          <div className={styles.settingsGrid}>
-            
-            <Card className={styles.settingsSection}>
-              <h3 className={styles.sectionTitle}>Account Setup</h3>
-              
-              <div className={styles.settingRow}>
-                <div className={styles.settingInfo}>
-                  <strong>Push Notifications</strong>
-                  <span>Get alerts when agencies reply</span>
-                </div>
-                <div className={styles.switch}>
-                  <input type="checkbox" id="push" defaultChecked />
-                  <label htmlFor="push"></label>
-                </div>
-              </div>
-
-              <div className={styles.settingRow}>
-                <div className={styles.settingInfo}>
-                  <strong>Data Saver Mode</strong>
-                  <span>Don&apos;t auto-download images on mobile data</span>
-                </div>
-                <div className={styles.switch}>
-                  <input type="checkbox" id="data" />
-                  <label htmlFor="data"></label>
-                </div>
-              </div>
-
-              <div className={styles.settingRow}>
-                <div className={styles.settingInfo}>
-                  <strong>Language / Lugha</strong>
-                  <span>English</span>
-                </div>
-                <Globe size={20} color="var(--color-text-muted)" />
-              </div>
-            </Card>
-
-            <Card className={styles.settingsSection}>
-              <h3 className={styles.sectionTitle}>Danger Zone</h3>
-              <Button variant="danger" fullWidth className={styles.logoutBtn}>
-                <LogOut size={18} /> Sign Out
-              </Button>
-            </Card>
-          </div>
-        )}
-
-      </div>
+      <ProfileTabs userEmail={user.email || ""} />
     </div>
   );
 }

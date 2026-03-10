@@ -25,16 +25,18 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Refresh expiring auth tokens
-  const { data } = await supabase.auth.getClaims()
-  const user = data?.claims
+  // Refresh the session by getting the user
+  const { data: { user } } = await supabase.auth.getUser()
 
+  // Protect authenticated routes
   if (
     !user &&
+    !request.nextUrl.pathname.startsWith('/login') &&
+    !request.nextUrl.pathname.startsWith('/signup') &&
+    !request.nextUrl.pathname.startsWith('/auth') &&
     (request.nextUrl.pathname.startsWith('/profile') || 
      request.nextUrl.pathname.startsWith('/submit'))
   ) {
-    // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)

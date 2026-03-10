@@ -3,72 +3,64 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
-import { headers } from 'next/headers'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
 
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+
+  if (!email || !password) {
+    redirect('/login?message=Please fill in all fields')
   }
 
-  const { error } = await supabase.auth.signInWithPassword(data)
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
 
   if (error) {
-    redirect('/login?message=Could not authenticate user')
+    redirect(`/login?message=${encodeURIComponent(error.message)}`)
   }
 
   revalidatePath('/', 'layout')
-  redirect('/profile')
+  redirect('/')
 }
 
 export async function signup(formData: FormData) {
   const supabase = await createClient()
 
-  // Use the origin from the headers to set the email redirect to
-  const headersList = await headers();
-  const origin = headersList.get('origin') || 'http://localhost:3000';
+  const firstName = formData.get('firstName') as string
+  const lastName = formData.get('lastName') as string
+  const username = formData.get('username') as string
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
 
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
+  if (!firstName || !lastName || !username || !email || !password) {
+    redirect('/signup?message=Please fill in all fields')
+  }
+
+  if (password.length < 6) {
+    redirect('/signup?message=Password must be at least 6 characters')
   }
 
   const { error } = await supabase.auth.signUp({
-    email: data.email,
-    password: data.password,
+    email,
+    password,
     options: {
-      emailRedirectTo: `${origin}/auth/callback`,
+      data: {
+        first_name: firstName,
+        last_name: lastName,
+        username: username,
+        full_name: `${firstName} ${lastName}`,
+      },
     },
   })
 
   if (error) {
-    redirect('/login?message=Could not sign up user')
+    redirect(`/signup?message=${encodeURIComponent(error.message)}`)
   }
 
-  redirect('/login?message=Check email to continue sign in process')
-}
-
-export async function signInWithGoogle() {
-  const supabase = await createClient()
-
-  // Use the origin from the headers to set the redirect to
-  const headersList = await headers();
-  const origin = headersList.get('origin') || 'http://localhost:3000';
-  
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: `${origin}/auth/callback`,
-    },
-  })
-
-  if (error) {
-    redirect('/login?message=Could not authenticate via Google')
-  }
-
-  if (data.url) {
-    redirect(data.url)
-  }
+  revalidatePath('/', 'layout')
+  redirect('/login?message=Account created successfully! Sign in to continue.')
 }

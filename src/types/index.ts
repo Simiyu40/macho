@@ -4,6 +4,7 @@ export type Severity = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 export interface User {
   id: string;
   name: string;
+  username?: string;
   avatar_url?: string;
   citizen_credits: number;
 }
@@ -27,19 +28,21 @@ export interface Report {
   id: string;
   title: string;
   description: string;
-  image_url: string;
+  image_url: string | null;
   status: ReportStatus;
   severity: Severity;
   location: Location;
-  agency_id: string;
+  agency_id: string | null;
   user_id: string;
   created_at: string;
   upvotes: number;
   shares: number;
-  heat_score: number; // calculated: upvotes + (shares * 5)
+  heat_score: number;
   comments_count: number;
-  user?: User;         // Nested for mock data
-  agency?: Agency;     // Nested for mock data
+  address?: string | null;
+  county?: string | null;
+  user?: User;
+  agency?: Agency;
 }
 
 export interface Comment {

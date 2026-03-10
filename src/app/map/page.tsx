@@ -3,9 +3,8 @@
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/Skeleton";
 
-// Dynamically import MapView with SSR disabled because Leaflet uses window/document
-const MapView = dynamic(
-  () => import("@/components/map/MapView"),
+const GoogleMapView = dynamic(
+  () => import("@/components/map/GoogleMapView"),
   { 
     ssr: false,
     loading: () => (
@@ -18,5 +17,5 @@ const MapView = dynamic(
 );
 
 export default function MapPage() {
-  return <MapView />;
+  return <GoogleMapView />;
 }

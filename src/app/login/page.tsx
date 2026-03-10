@@ -6,11 +6,13 @@ import { Shield, Eye } from 'lucide-react'
 import Link from 'next/link'
 import GoogleAuthButton from '@/components/auth/GoogleAuthButton'
 
-export default function LoginPage({
+export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: { message: string }
+  searchParams: Promise<{ message?: string }>
 }) {
+  const params = await searchParams
+
   return (
     <div className={styles.container}>
       <Card className={styles.loginCard}>
@@ -45,8 +47,14 @@ export default function LoginPage({
             />
           </div>
 
-          {searchParams?.message && (
-            <p className={styles.message}>{searchParams.message}</p>
+          {params?.message && (
+            <p className={
+              params.message.toLowerCase().includes('success') 
+                ? styles.successMessage 
+                : styles.message
+            }>
+              {params.message}
+            </p>
           )}
 
           <div className={styles.actions}>
@@ -63,7 +71,8 @@ export default function LoginPage({
         <GoogleAuthButton styles={styles} />
         
         <div className={styles.footerNote}>
-          Don&apos;t have an account? <Link href="/signup" style={{ color: 'var(--color-primary)', marginLeft: '4px' }}>Sign up</Link>
+          Don&apos;t have an account?{' '}
+          <Link href="/signup" style={{ color: 'var(--color-primary)', marginLeft: '4px' }}>Sign up</Link>
         </div>
         
         <div className={styles.footerNote} style={{ marginTop: '8px' }}>
