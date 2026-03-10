@@ -1,42 +1,158 @@
+/* 
+  Macho ya Raia Theme Variables 
+  Modern Dark UI with deep purples and high-visibility accents
+*/
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Color Palette */
+  --color-bg-base: #0a0e1a; /* Deep Navy Black */
+  --color-bg-surface: rgba(22, 28, 45, 0.7); /* Translucent Midnight */
+  --color-bg-highlight: rgba(35, 43, 66, 0.9);
+
+  --color-primary: #6c3ce0; /* Rich Purple */
+  --color-primary-glow: rgba(108, 60, 224, 0.5);
+
+  --color-accent: #00e5ff; /* Electric Cyan */
+  --color-accent-glow: rgba(0, 229, 255, 0.5);
+
+  --color-text-main: #e8eaf6; /* Soft White */
+  --color-text-muted: #8c9eff; /* Purple-tinted Gray */
+
+  /* Status Colors */
+  --color-status-pending: #ffab00; /* Warm Amber */
+  --color-status-review: #00e5ff; /* Cyan */
+  --color-status-resolved: #00e676; /* Vivid Green */
+  --color-status-critical: #ff1744; /* Neon Red */
+
+  /* Borders & Shadows */
+  --border-glass: 1px solid rgba(255, 255, 255, 0.1);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --shadow-glow-purple: 0 0 20px var(--color-primary-glow);
+  --shadow-glow-cyan: 0 0 20px var(--color-accent-glow);
+
+  /* Geometry */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-html,
 body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--color-text-main);
+  background: var(--color-bg-base);
+  font-family: var(--font-dm-sans), sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
+  min-height: 100vh;
   margin: 0;
+  overflow-x: hidden;
+  position: relative;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+/* Base heading styles utilizing Space Grotesk */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-space-grotesk), sans-serif;
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+/* Global utility classes for glassmorphism */
+.glass-panel {
+  background: var(--color-bg-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: var(--border-glass);
+  box-shadow: var(--shadow-glass);
+  border-radius: var(--radius-lg);
+}
+
+.text-gradient {
+  background: linear-gradient(90deg, #b388ff 0%, #00e5ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 
+  Global Animations 
+*/
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(108, 60, 224, 0.7);
   }
+  70% {
+    box-shadow: 0 0 0 15px rgba(108, 60, 224, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(108, 60, 224, 0);
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes gradientPan {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Leaflet maps custom dark theme overrides */
+.leaflet-container {
+  background-color: var(--color-bg-base) !important;
+  font-family: inherit !important;
+}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--color-bg-surface) !important;
+  color: var(--color-text-main) !important;
+  backdrop-filter: blur(16px) !important;
+  border: var(--border-glass) !important;
 }

@@ -1,0 +1,56 @@
+.statCard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.iconWrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.valueRow {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.value {
+  font-size: 2rem;
+  font-family: var(--font-space-grotesk);
+  color: var(--color-text-main);
+  margin: 0;
+}
+
+.trend {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.trendUp {
+  color: var(--color-status-resolved);
+  background: rgba(0, 230, 118, 0.1);
+}
+
+.trendDown {
+  color: var(--color-status-critical);
+  background: rgba(255, 23, 68, 0.1);
+}

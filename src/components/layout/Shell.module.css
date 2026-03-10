@@ -1,0 +1,28 @@
+.appWrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.mainContent {
+  flex: 1;
+  padding-top: 72px; /* Height of navbar */
+  padding-left: 260px; /* Width of sidebar */
+  min-height: calc(100vh - 72px);
+  position: relative;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .mainContent {
+    padding-left: 80px; /* Width of collapsed sidebar */
+  }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .mainContent {
+    padding-left: 0;
+    padding-bottom: 72px; /* Height of bottom nav + safe area */
+  }
+}
