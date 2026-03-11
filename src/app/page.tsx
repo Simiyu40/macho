@@ -1,4 +1,3 @@
-import { ButtonHTMLAttributes, forwardRef } from "react";
 import styles from "./page.module.css";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -17,7 +16,7 @@ export default function Home() {
         <div className={styles.heroContent}>
           <Badge variant="review" className={styles.betaBadge}>Macho ya Raia v1.0 Live</Badge>
           <h1 className={styles.headline}>
-            Kenya's Eyes <br/>
+            Kenya&apos;s Eyes <br/>
             <span className="text-gradient">Are Watching.</span>
           </h1>
           <p className={styles.subhead}>

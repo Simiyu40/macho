@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import styles from "./page.module.css";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
-import { Camera, MapPin, AlignLeft, CheckCircle2, ChevronRight, ChevronLeft, AlertTriangle, Plus } from "lucide-react";
+import { Camera, AlignLeft, CheckCircle2, ChevronRight, ChevronLeft, AlertTriangle, Plus } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 
@@ -44,7 +45,6 @@ export default function SubmitPage() {
   const [agencies, setAgencies] = useState<AgencyRow[]>([]);
   const [counties, setCounties] = useState<CountyRow[]>([]);
   const [constituencies, setConstituencies] = useState<ConstituencyRow[]>([]);
-  const [filteredConstituencies, setFilteredConstituencies] = useState<ConstituencyRow[]>([]);
 
   // Form State
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -76,19 +76,18 @@ export default function SubmitPage() {
       if (constituenciesRes.data) setConstituencies(constituenciesRes.data);
     }
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Filter constituencies when county changes
-  useEffect(() => {
+  // Filter constituencies when county changes (derived state via useMemo)
+  const filteredConstituencies = useMemo(() => {
     if (selectedCounty) {
       const county = counties.find(c => c.name === selectedCounty);
       if (county) {
-        setFilteredConstituencies(constituencies.filter(c => c.county_id === county.id));
+        return constituencies.filter(c => c.county_id === county.id);
       }
-    } else {
-      setFilteredConstituencies([]);
     }
-    setSelectedConstituency("");
+    return [];
   }, [selectedCounty, counties, constituencies]);
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -219,7 +218,7 @@ export default function SubmitPage() {
           <div className={styles.uploadZone}>
             {photoPreview ? (
               <div className={styles.previewContainer}>
-                <img src={photoPreview} alt="Preview" className={styles.previewImage} />
+                <Image src={photoPreview} alt="Preview" className={styles.previewImage} width={600} height={300} unoptimized style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
                 <button className={styles.changePhotoBtn} onClick={() => { setPhotoPreview(null); setPhotoFile(null); }}>Retake Photo</button>
               </div>
             ) : (

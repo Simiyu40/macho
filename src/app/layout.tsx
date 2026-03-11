@@ -15,6 +15,12 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   title: "Macho ya Raia",
   description: "Kenya's civic-tech accountability platform",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Macho ya Raia",
+  },
 };
 
 export const viewport = {
@@ -31,6 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${spaceGrotesk.variable} ${dmSans.variable}`}>
+        <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}` }} />
         <Shell>
           {children}
         </Shell>
