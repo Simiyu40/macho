@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Image from "next/image";
+import NextImage from "next/image";
 import { Report } from "@/types";
 import { Heart, Share2, MessageSquare, MapPin, MoreHorizontal } from "lucide-react";
 import { Card } from "@/components/ui/Card";
@@ -64,11 +64,12 @@ export function ReportCard({ report }: ReportCardProps) {
         
         {/* Image - simplified to regular img tag for external URLs without config */}
         <div className={styles.imageContainer}>
-          <img 
-            src={report.image_url} 
+          <NextImage 
+            src={report.image_url ?? ""} 
             alt={report.title} 
             className={styles.image}
-            loading="lazy"
+            fill
+            sizes="(max-width: 768px) 100vw, 600px"
           />
           <div className={styles.locationOverlay}>
             <MapPin size={14} />

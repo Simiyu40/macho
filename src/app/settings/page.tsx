@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import styles from "./page.module.css";
 import { Card } from "@/components/ui/Card";
 import { Shield, CheckCircle, Settings } from "lucide-react";
-import RoleToggle from "./RoleToggle";
+import RoleToggle from "@/app/settings/RoleToggle";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
