@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { MapPin, Calendar, Navigation, ExternalLink, Shield, CheckCircle } from "lucide-react";
+import { MapPin, Calendar, Navigation, ExternalLink, Shield, CheckCircle, AlertTriangle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { FollowButton } from "@/components/ui/FollowButton";
 import { CommentsSection } from "@/components/feed/CommentsSection";
@@ -24,7 +24,8 @@ export default async function ReportDetailPage({ params }: PageProps) {
       *,
       profiles:user_id ( id, full_name, username, avatar_url ),
       agencies:agency_id ( id, name, slug, color, verified ),
-      official_responder:official_responded_by ( full_name, government_role )
+      official_responder:official_responded_by ( full_name, government_role ),
+      verifier:verified_by ( full_name )
     `)
     .eq("id", id)
     .single();
@@ -36,6 +37,7 @@ export default async function ReportDetailPage({ params }: PageProps) {
   // Check if current user is government or trusted verifier
   let isGovernment = false;
   let isTrustedVerifier = false;
+  let governmentRole = "";
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
@@ -44,14 +46,23 @@ export default async function ReportDetailPage({ params }: PageProps) {
       .single();
     isGovernment = profile?.is_government || false;
     isTrustedVerifier = profile?.is_trusted_verifier || false;
+    governmentRole = profile?.government_role || "";
   }
 
   const profile = report.profiles as Record<string, string> | null;
   const agency = report.agencies as Record<string, string> | null;
   const responder = report.official_responder as Record<string, string> | null;
+  const verifier = report.verifier as Record<string, string> | null;
   const userName = profile?.full_name || "Anonymous";
   const userInitial = userName.charAt(0);
   const timeAgo = formatDistanceToNow(new Date(report.created_at), { addSuffix: true });
+
+  const officialStatusLabels: Record<string, { label: string; color: string }> = {
+    FIX_IN_PROGRESS: { label: "🔧 Fix in Progress", color: "#ffab00" },
+    SCHEDULED: { label: "📅 Scheduled for FY 2026/27", color: "#00e5ff" },
+    COMPLETED: { label: "✅ Completed", color: "#00e676" },
+    REJECTED: { label: "❌ Rejected", color: "#ff1744" },
+  };
 
   return (
     <div className={styles.container}>
@@ -126,44 +137,91 @@ export default async function ReportDetailPage({ params }: PageProps) {
         </div>
       </Card>
 
-      {/* Official Response Section */}
+      {/* ====== GOVERNMENT TRANSPARENCY PORTAL ====== */}
       <Card className={styles.sectionCard}>
-        <h2 className={styles.sectionTitle}>
-          <Shield size={20} /> Official Response
-        </h2>
+        <div className={styles.portalHeader}>
+          <h2 className={styles.sectionTitle}>
+            <Shield size={22} /> Government Transparency Portal
+          </h2>
+          <Badge variant={report.official_status ? "resolved" : "pending"}>
+            {report.official_status ? "Responded" : "Awaiting Response"}
+          </Badge>
+        </div>
 
+        {/* Always show official response status to ALL users */}
         {report.official_response ? (
           <div className={styles.officialResponse}>
-            <Badge variant={report.official_status === "COMPLETED" ? "resolved" : "pending"}>
-              {report.official_status?.replace("_", " ") || "Pending"}
-            </Badge>
+            <div className={styles.statusBanner} style={{
+              borderColor: officialStatusLabels[report.official_status]?.color || "#ffab00",
+              background: `${officialStatusLabels[report.official_status]?.color || "#ffab00"}10`,
+            }}>
+              <span className={styles.statusLabel} style={{ color: officialStatusLabels[report.official_status]?.color }}>
+                {officialStatusLabels[report.official_status]?.label || report.official_status}
+              </span>
+            </div>
             <p className={styles.responseText}>{report.official_response}</p>
             {responder && (
-              <span className={styles.respondedBy}>
-                — {responder.full_name}, {responder.government_role}
-                {report.official_responded_at && ` · ${formatDistanceToNow(new Date(report.official_responded_at), { addSuffix: true })}`}
-              </span>
+              <div className={styles.responderInfo}>
+                <Shield size={14} />
+                <span>
+                  {responder.full_name} · {responder.government_role}
+                  {report.official_responded_at && ` · ${formatDistanceToNow(new Date(report.official_responded_at), { addSuffix: true })}`}
+                </span>
+              </div>
             )}
           </div>
         ) : (
-          <p className={styles.noResponse}>No official response yet.</p>
+          <div className={styles.noResponseBanner}>
+            <AlertTriangle size={20} />
+            <div>
+              <strong>No official response yet</strong>
+              <p>This report is awaiting a response from the responsible government agency or official.</p>
+            </div>
+          </div>
         )}
 
+        {/* Government Response Form — only for government accounts */}
         {isGovernment && user && (
-          <GovernmentResponse reportId={report.id} userId={user.id} />
+          <div className={styles.govFormWrapper}>
+            <div className={styles.govBadge}>
+              <Shield size={14} /> Responding as: <strong>{governmentRole || "Government Official"}</strong>
+            </div>
+            <GovernmentResponse reportId={report.id} userId={user.id} />
+          </div>
         )}
       </Card>
 
-      {/* Verification */}
-      {!report.is_verified && isTrustedVerifier && user && (
-        <Card className={styles.sectionCard}>
-          <h2 className={styles.sectionTitle}>
-            <CheckCircle size={20} /> Community Verification
-          </h2>
-          <p className={styles.verifyText}>As a trusted verifier, you can confirm this report is genuine.</p>
-          <VerifyReport reportId={report.id} userId={user.id} />
-        </Card>
-      )}
+      {/* ====== COMMUNITY VERIFICATION ====== */}
+      <Card className={styles.sectionCard}>
+        <h2 className={styles.sectionTitle}>
+          <CheckCircle size={20} /> Report Verification
+        </h2>
+
+        {report.is_verified ? (
+          <div className={styles.verifiedBanner}>
+            <CheckCircle size={20} />
+            <div>
+              <strong>✅ This report has been verified</strong>
+              {verifier && <p>Verified by {verifier.full_name} — a trusted community member.</p>}
+            </div>
+          </div>
+        ) : (
+          <div className={styles.unverifiedBanner}>
+            <AlertTriangle size={18} />
+            <div>
+              <strong>Not yet verified</strong>
+              <p>This report has not been verified by a trusted community member.</p>
+            </div>
+          </div>
+        )}
+
+        {/* Verify button — only for trusted verifiers */}
+        {!report.is_verified && isTrustedVerifier && user && (
+          <div style={{ marginTop: 12 }}>
+            <VerifyReport reportId={report.id} userId={user.id} />
+          </div>
+        )}
+      </Card>
 
       {/* Comments */}
       <Card className={styles.sectionCard}>
