@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Search, Bell, Menu, User } from "lucide-react";
+import { Search, Bell, Menu, User, X, Info, BookOpen, Settings } from "lucide-react";
 import styles from "./Navbar.module.css";
 import { useState, useEffect, useRef } from "react";
 import { User as SupabaseUser } from "@supabase/supabase-js";
@@ -111,6 +111,40 @@ export default function Navbar({ user }: { user: SupabaseUser | null }) {
           </Link>
         </div>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMenuOpen && (
+        <div className={styles.mobileMenuOverlay} onClick={() => setIsMenuOpen(false)}>
+          <div className={styles.mobileMenu} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.mobileMenuHeader}>
+              <span className={styles.menuTitle}>Navigation</span>
+              <button 
+                className={styles.closeMenuBtn}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            <nav className={styles.mobileNavLinks}>
+              <Link href="/about" className={styles.mobileNavLink} onClick={() => setIsMenuOpen(false)}>
+                <Info size={20} className={styles.mobileNavIcon} />
+                About Us
+              </Link>
+              <Link href="/docs" className={styles.mobileNavLink} onClick={() => setIsMenuOpen(false)}>
+                <BookOpen size={20} className={styles.mobileNavIcon} />
+                Documentation
+              </Link>
+              {user && (
+                <Link href="/settings" className={styles.mobileNavLink} onClick={() => setIsMenuOpen(false)}>
+                  <Settings size={20} className={styles.mobileNavIcon} />
+                  Settings
+                </Link>
+              )}
+            </nav>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

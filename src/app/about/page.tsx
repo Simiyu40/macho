@@ -1,6 +1,7 @@
 import styles from "./page.module.css";
 import { Shield, Users, Globe, Target, ArrowRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function AboutPage() {
   const team = [
@@ -119,9 +120,9 @@ export default function AboutPage() {
           <div className={styles.closingCard}>
             <h2>Ready to participate?</h2>
             <p>Join the movement towards a data-driven, accountable society.</p>
-            <a href="/submit" className={styles.primaryButton}>
+            <Link href="/submit" className={styles.primaryButton}>
               Report an Issue <ArrowRight size={18} />
-            </a>
+            </Link>
           </div>
         </section>
       </div>
