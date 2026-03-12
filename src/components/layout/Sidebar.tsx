@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, ListFilter, MapPin, BarChart3, PlusCircle, Settings, User } from "lucide-react";
+import { Home, ListFilter, MapPin, BarChart3, PlusCircle, Settings, User, Info, BookOpen } from "lucide-react";
 import styles from "./Sidebar.module.css";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 
@@ -20,8 +20,12 @@ export default function Sidebar({ user }: { user: SupabaseUser | null }) {
     { href: "/submit", label: "New Report", icon: PlusCircle, isPrimary: true },
     { href: "/profile", label: "Profile", icon: User },
     { href: "/settings", label: "Settings", icon: Settings },
+    { href: "/about", label: "About Us", icon: Info },
+    { href: "/docs", label: "Documentation", icon: BookOpen },
   ] : [
-    { href: "/login", label: "Log In", icon: User, isPrimary: true }
+    { href: "/login", label: "Log In", icon: User, isPrimary: true },
+    { href: "/about", label: "About Us", icon: Info },
+    { href: "/docs", label: "Documentation", icon: BookOpen },
   ];
 
   return (
