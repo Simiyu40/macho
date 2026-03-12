@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Search, Bell, Menu, User, X, Info, BookOpen, Settings } from "lucide-react";
+import { Search, Bell, Menu, User } from "lucide-react";
 import styles from "./Navbar.module.css";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/client";
 import { SearchResults } from "./SearchResults";
@@ -15,22 +15,23 @@ export default function Navbar({ user }: { user: SupabaseUser | null }) {
   const [isSearching, setIsSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
-    if (!searchQuery.trim()) {
-      setSearchResults({ reports: [], agencies: [] });
-      setShowResults(false);
-      return;
-    }
-
-    setIsSearching(true);
-    setShowResults(true);
-
     debounceRef.current = setTimeout(async () => {
       const q = searchQuery.trim();
+      
+      if (!q) {
+        setSearchResults({ reports: [], agencies: [] });
+        setShowResults(false);
+        setIsSearching(false);
+        return;
+      }
+
+      setIsSearching(true);
+      setShowResults(true);
       
       const [reportsRes, agenciesRes] = await Promise.all([
         supabase
@@ -55,7 +56,7 @@ export default function Navbar({ user }: { user: SupabaseUser | null }) {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [searchQuery]);
+  }, [searchQuery, supabase]);
 
   return (
     <header className={styles.navbar}>
@@ -111,40 +112,6 @@ export default function Navbar({ user }: { user: SupabaseUser | null }) {
           </Link>
         </div>
       </div>
-
-      {/* Mobile Menu Overlay */}
-      {isMenuOpen && (
-        <div className={styles.mobileMenuOverlay} onClick={() => setIsMenuOpen(false)}>
-          <div className={styles.mobileMenu} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.mobileMenuHeader}>
-              <span className={styles.menuTitle}>Navigation</span>
-              <button 
-                className={styles.closeMenuBtn}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <X size={24} />
-              </button>
-            </div>
-            
-            <nav className={styles.mobileNavLinks}>
-              <Link href="/about" className={styles.mobileNavLink} onClick={() => setIsMenuOpen(false)}>
-                <Info size={20} className={styles.mobileNavIcon} />
-                About Us
-              </Link>
-              <Link href="/docs" className={styles.mobileNavLink} onClick={() => setIsMenuOpen(false)}>
-                <BookOpen size={20} className={styles.mobileNavIcon} />
-                Documentation
-              </Link>
-              {user && (
-                <Link href="/settings" className={styles.mobileNavLink} onClick={() => setIsMenuOpen(false)}>
-                  <Settings size={20} className={styles.mobileNavIcon} />
-                  Settings
-                </Link>
-              )}
-            </nav>
-          </div>
-        </div>
-      )}
     </header>
   );
 }

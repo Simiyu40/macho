@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { createClient } from "@/utils/supabase/client";
 import styles from "./FollowButton.module.css";
 
@@ -13,27 +13,34 @@ export function FollowButton({ targetUserId, size = "sm" }: FollowButtonProps) {
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const supabase = createClient();
-
-  const checkFollowStatus = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user || user.id === targetUserId) { setLoading(false); return; }
-    setCurrentUserId(user.id);
-
-    const { data } = await supabase
-      .from("follows")
-      .select("id")
-      .eq("follower_id", user.id)
-      .eq("following_id", targetUserId)
-      .single();
-    
-    setIsFollowing(!!data);
-    setLoading(false);
-  }, [targetUserId, supabase]);
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
+    let mounted = true;
+
+    const checkFollowStatus = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!mounted) return;
+      if (!user || user.id === targetUserId) { setLoading(false); return; }
+      setCurrentUserId(user.id);
+
+      const { data } = await supabase
+        .from("follows")
+        .select("id")
+        .eq("follower_id", user.id)
+        .eq("following_id", targetUserId)
+        .single();
+      
+      if (mounted) {
+        setIsFollowing(!!data);
+        setLoading(false);
+      }
+    };
+
     checkFollowStatus();
-  }, [checkFollowStatus]);
+
+    return () => { mounted = false; };
+  }, [targetUserId, supabase]);
 
   const handleToggle = async () => {
     if (!currentUserId) return;
