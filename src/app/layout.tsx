@@ -28,6 +28,7 @@ export const viewport = {
 };
 
 import Shell from "@/components/layout/Shell";
+import SessionSyncer from "@/components/auth/SessionSyncer";
 
 export default function RootLayout({
   children,
@@ -38,6 +39,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${spaceGrotesk.variable} ${dmSans.variable}`}>
         <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}` }} />
+        <SessionSyncer />
         <Shell>
           {children}
         </Shell>
