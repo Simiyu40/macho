@@ -24,7 +24,7 @@ export default async function LoginPage({
           <p className={styles.subtitle}>Welcome back! Sign in to continue.</p>
         </div>
 
-        <form className={styles.form}>
+        <form className={styles.form} method="POST">
           <div className={styles.inputGroup}>
             <label htmlFor="email">Email</label>
             <input 

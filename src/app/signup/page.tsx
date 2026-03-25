@@ -24,7 +24,7 @@ export default async function SignupPage({
           <p className={styles.subtitle}>Create your account to empower your community.</p>
         </div>
 
-        <form className={styles.form}>
+        <form className={styles.form} method="POST">
           <div className={styles.nameRow}>
             <div className={styles.inputGroup}>
               <label htmlFor="firstName">First Name</label>
