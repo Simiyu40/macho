@@ -64,7 +64,7 @@
   flex: 1;
   max-width: 480px;
   position: relative;
-  display: none; /* Hidden on mobile, shown on desktop */
+  display: none;
 }
 
 @media (min-width: 768px) {
@@ -104,7 +104,7 @@
 .actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .actionBtn {
@@ -140,37 +140,264 @@
   padding: 0 4px;
 }
 
-.profileBtn {
+/* ── Login Button (Unauthenticated) ── */
+
+.loginBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: white;
+  font-family: var(--font-space-grotesk);
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: var(--radius-full);
   text-decoration: none;
+  transition: all 0.25s ease;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.25);
+  letter-spacing: 0.02em;
 }
 
-.avatar {
-  width: 40px;
-  height: 40px;
+.loginBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 28px rgba(139, 92, 246, 0.4);
+}
+
+/* ── Profile Chip (Authenticated) ── */
+
+.profileChipWrapper {
+  position: relative;
+}
+
+.profileChip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--color-text-main);
+}
+
+.profileChip:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.chipAvatar {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: var(--color-bg-highlight);
-  border: var(--border-glass);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-main);
   position: relative;
   overflow: hidden;
+  flex-shrink: 0;
+}
+
+.chipAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.chipInitials {
+  font-family: var(--font-space-grotesk);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.03em;
 }
 
 .onlineDot {
   position: absolute;
-  bottom: 2px;
-  right: 2px;
+  bottom: 0;
+  right: 0;
   width: 10px;
   height: 10px;
   background: var(--color-status-resolved);
   border-radius: 50%;
-  border: 2px solid var(--color-bg-base);
+  border: 2px solid var(--color-bg-surface);
 }
+
+.chipName {
+  font-family: var(--font-space-grotesk);
+  font-size: 0.85rem;
+  font-weight: 600;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chipChevron {
+  color: var(--color-text-muted);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+/* ── Profile Dropdown ── */
+
+.profileDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 260px;
+  background: var(--color-bg-surface);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 8px;
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  animation: dropdownIn 0.18s ease-out;
+  z-index: 100;
+}
+
+@keyframes dropdownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.dropdownHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px;
+}
+
+.dropdownAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.dropdownAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.dropdownInitials {
+  font-family: var(--font-space-grotesk);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: white;
+}
+
+.dropdownInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.dropdownName {
+  font-family: var(--font-space-grotesk);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdownEmail {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdownDivider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 4px 0;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.dropdownItem:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-main);
+}
+
+.dropdownSignOut {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: transparent;
+  border: none;
+  color: var(--color-status-critical);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.15s ease;
+}
+
+.dropdownSignOut:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* ── Mobile Overrides ── */
 
 @media (max-width: 767px) {
   .mobileMenuBtn {
     display: block;
+  }
+
+  .chipName {
+    display: none;
+  }
+
+  .chipChevron {
+    display: none;
+  }
+
+  .profileChip {
+    padding: 4px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
   }
 }
